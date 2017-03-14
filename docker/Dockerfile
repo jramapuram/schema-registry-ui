@@ -14,11 +14,7 @@ RUN wget "https://caddyserver.com/download/build?os=linux&arch=amd64&features=" 
     && rm -f /caddy.tgz
 
 # Add and Setup Schema-Registry-Ui
-RUN wget "https://github.com/Landoop/schema-registry-ui/releases/download/v.0.9.0/schema-registry-ui-0.9.0.tar.gz" \
-         -O /schema-registry-ui.tar.gz \
-    && mkdir /schema-registry-ui \
-    && tar xzf /schema-registry-ui.tar.gz -C /schema-registry-ui \
-    && rm -f /schema-registry-ui.tar.gz
+COPY dist /schema-registry-ui
 
 # Add configuration and runtime files
 ADD Caddyfile /caddy/
