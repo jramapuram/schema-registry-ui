@@ -183,7 +183,9 @@
                     <td md-cell>{{s.default}}</td>
                     <td md-cell class="md-card-image md-caption">{{s.doc}}</td>
                     <td md-cell>{{schema.flattened[$index]}}</td>
-                    <td md-cell>test</td> <!-- do link here -->
+                    <td md-cell>
+                      <input type="checkbox" ng-model="checkboxModel.value">
+                    </td>
                   </tr>
 
                 </tbody>

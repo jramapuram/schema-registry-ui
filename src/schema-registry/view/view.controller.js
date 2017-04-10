@@ -3,6 +3,11 @@ angularAPP.controller('SubjectsCtrl', function ($rootScope, $scope, $route, $rou
   $log.info("Starting schema-registry controller: view ( " + $routeParams.subject + "/" + $routeParams.version + " )");
   $rootScope.listChanges = false;
   $rootScope.runningList = [];
+
+  $scope.checkboxModel = {
+    value1 : true
+  };
+
   toastFactory.hideToast();
 
   /**
