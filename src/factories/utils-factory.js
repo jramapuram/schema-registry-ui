@@ -2,7 +2,6 @@
  * Utils angularJS Factory
  */
 angularAPP.factory('UtilsFactory', function ($log) {
-
   // Sort arrays by key
   function sortByKey(array, key, reverse) {
     return array.sort(function (a, b) {
@@ -12,9 +11,71 @@ angularAPP.factory('UtilsFactory', function ($log) {
     });
   }
 
+  // schema = "{\"type\":\"record\",\"name\":\"User\",\"fields\":[{\"name\":\"bla\",\"type\":\"string\"}]}";
+  // object =  JSON.parse(schema);
+  function recurseSchema(object, value, result) {
+    var result = result || [];
+
+    for (var key in object) {
+      if (key === value) {
+        if (typeof object[key] === "object") {
+          recurseSchema(object[key], value, result);
+        }else {
+          result.push(object[key]);
+        }
+      }
+
+      if (typeof object[key] === "object") {
+        recurseSchema(object[key], value, result);
+      }
+    }
+
+    return result;
+  }
+
+  function prependBaseName(basename, arr){
+    for (var i = 0; i < arr.length; i++){
+      arr[i] = String(basename) + "." + String(arr[i]);
+    }
+
+    if (arr.length > 0) {
+      return arr;
+    }
+
+    return [];
+  }
+
+  function toType(obj) {
+    return ({}).toString.call(obj).match(/\s([a-zA-Z]+)/)[1].toLowerCase();
+  }
+
+  function range(start, count) {
+    return Array.apply(0, Array(count))
+      .map(function (element, index) {
+        return index + start;
+      });
+  }
+
+  // function getFullyQualifiedName(object, value){
+  //   var result = [];
+
+  //   for (var key in object){
+
+  //   }
+  // }
+
   /* Public API */
   return {
-
+    recurseSchema: function(object, value, result) {
+      return prependBaseName(object["name"],
+                             recurseSchema(object.fields, value, result));
+    },
+    range: function(start, count){
+      return range(start, count);
+    },
+    toType: function(obj){
+      return toType(obj);
+    },
     sortByKey: function (array, key, reverse) {
       return sortByKey(array, key, reverse);
     },

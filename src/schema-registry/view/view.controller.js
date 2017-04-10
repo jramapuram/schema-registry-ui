@@ -2,6 +2,7 @@ angularAPP.controller('SubjectsCtrl', function ($rootScope, $scope, $route, $rou
 
   $log.info("Starting schema-registry controller: view ( " + $routeParams.subject + "/" + $routeParams.version + " )");
   $rootScope.listChanges = false;
+  $rootScope.runningList = [];
   toastFactory.hideToast();
 
   /**
@@ -49,7 +50,19 @@ angularAPP.controller('SubjectsCtrl', function ($rootScope, $scope, $route, $rou
       $log.info('Success fetching [' + $routeParams.subject + '/' + $routeParams.version + '] with MetaData');
       $rootScope.subjectObject = selectedSubject;
       $rootScope.schema = selectedSubject.Schema.fields;
+
+      // flattened schemas need to be appened here so that they can be viewed in the viewer
+      if (selectedSubject.flattenedNames != null && selectedSubject.flattenedNames.length > 0){
+        $rootScope.schema.flattened = selectedSubject.flattenedNames;
+        $log.info('rootscope schema type: ' + UtilsFactory.toType($rootScope.schema)
+                  + ', flattened is '+ $rootScope.schema.flattened);
+      }
+      // else {
+      //   $rootScope.schema.flattened = [];
+      // }
+
       $scope.aceString = angular.toJson(selectedSubject.Schema, true);
+      //$scope.fullyQualifiedName = UtilsFactory.JSON.flatten($scope.aceString);
       $scope.aceStringOriginal = $scope.aceString;
       $scope.aceReady = true;
       SchemaRegistryFactory.getSubjectsVersions($routeParams.subject).then(
@@ -127,6 +140,11 @@ angularAPP.controller('SubjectsCtrl', function ($rootScope, $scope, $route, $rou
         toastFactory.showLongToast("Invalid Avro");
       }
     }
+  };
+
+  $scope.addToPushList = function (name) {
+    $scope.fullyQualifiedName = SchemaRegistryFactory.getFullyQualifiedName(name);
+    $rootScope.runningList.push($scope.fulyQualifiedName);
   };
 
   $scope.evolveAvroSchema = function () {
@@ -276,9 +294,11 @@ angularAPP.controller('SubjectsCtrl', function ($rootScope, $scope, $route, $rou
     $scope.aceString = aceString;
   };
 
- $scope.showTree = function (keyOrValue) {
+  $scope.showTree = function (keyOrValue) {
     return !(angular.isNumber(keyOrValue) || angular.isString(keyOrValue) || (keyOrValue==null));
- }
+  };
+
+  $scope.zip = rows=>rows[0].map((_,c)=>rows.map(row=>row[c]));
 
 }); //end of controller
 

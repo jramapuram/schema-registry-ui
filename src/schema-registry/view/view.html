@@ -74,7 +74,7 @@
         <md-button ng-show="!isAvroAceEditable" ng-click="toggleEditor();"
            aria-label="EDIT"
            aria-hidden="false">
-          <i class="fa fa-pencil-square-o ng-scope" aria-hidden="true"></i>
+          <i ccoyote_test_02lass="fa fa-pencil-square-o ng-scope" aria-hidden="true"></i>
             EDIT
         </md-button>
         <!-- When in edit-state, display the CANCEL button -->
@@ -168,18 +168,24 @@
                   <th md-column md-order-by="type"><span>Type</span></th>
                   <th md-column md-order-by="default"><span>Default</span></th>
                   <th md-column md-order-by="doc"><span>Documentation</span></th>
+                  <th md-column md-order-by="flattened"><span>Flattened Name</span></th>
+                  <th md-column md-order-by="selectedField"><span>Selected</span></th>
                 </tr>
                 </thead>
+
                 <tbody md-body>
-                <tr md-row md-select="selected" md-select-id="name" ng-repeat="s in schema">
-                  <td md-cell>{{s.name}}</td>
-                  <td md-cell>
-                    <json-tree ng-show="showTree(s.type)" object="s.type" root-name="'Type'"></json-tree>
-                    <div ng-hide="showTree(s.type)">{{s.type}}</div>
-                  </td>
-                  <td md-cell>{{s.default}}</td>
-                  <td md-cell class="md-card-image md-caption">{{s.doc}}</td>
-                </tr>
+                  <tr md-row md-select="selected" md-select-id="name" ng-repeat="s in schema">
+                    <td md-cell>{{s.name}}</td> <!-- do link here -->
+                    <td md-cell>
+                      <json-tree ng-show="showTree(s.type)" object="s.type" root-name="'Type'"></json-tree>
+                      <div ng-hide="showTree(s.type)">{{s.type}}</div>
+                    </td>
+                    <td md-cell>{{s.default}}</td>
+                    <td md-cell class="md-card-image md-caption">{{s.doc}}</td>
+                    <td md-cell>{{schema.flattened}}</td>
+                    <td md-cell>test</td> <!-- do link here -->
+                  </tr>
+
                 </tbody>
               </table>
             </md-table-container>

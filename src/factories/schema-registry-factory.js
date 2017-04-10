@@ -467,11 +467,25 @@ angularAPP.factory('SchemaRegistryFactory', function ($rootScope, $http, $locati
             CACHE = []; // Clean up existing cache - to replace with new one
             angular.forEach(latestSchemas, function (result) {
               var data = result.data;
+              var schemaData = JSON.parse(data.schema);
+
+              // var currentType = UtilsFactory.toType(schemaData);
+              // if (currentType == "string"){
+              //   $log.debug("current schema type is string, skipping..");
+              //   // schemaData.flattened = "";
+              // }else{
+              //   schemaData.flattened = UtilsFactory.recurseSchema(schemaData, "name");
+              //   $log.debug("isobject: " + schemaData.flattened + " of length "
+              //              + schemaData.length + "object type: "
+              //              + UtilsFactory.toType(schemaData.flattened));
+              // }
+
               var cacheData = {
                 version: data.version,  // version
                 id: data.id,            // id
                 schema: data.schema,    // schema - in String - schema i.e. {\"type\":\"record\",\"name\":\"User\",\"fields\":[{\"name\":\"name\",\"type\":\"string\"}]}
-                Schema: JSON.parse(data.schema), // js type | name | doc | fields ...
+                Schema: schemaData,     // js type | name | doc | fields ...
+                flattenedNames: UtilsFactory.recurseSchema(schemaData, "name"),
                 subjectName: data.subject
               };
               CACHE.push(cacheData);
@@ -501,12 +515,27 @@ angularAPP.factory('SchemaRegistryFactory', function ($rootScope, $http, $locati
         var start = new Date().getTime();
         getSubjectAtVersion(subjectName, subjectVersion).then(
           function success(subjectInformation) {
+
+            var fullSchema = JSON.parse(subjectInformation.schema); // this is json
+
+            // var currentType = UtilsFactory.toType(fullSchema);
+            // if (currentType == "string"){
+            //   $log.debug("1. current schema type is string, skipping..");
+            //   // schemaData.flattened = "";
+            // }else{
+            //   fullSchema.flattened = UtilsFactory.recurseSchema(fullSchema, "name");
+            //   $log.debug("1. isobject");
+            //   // $log.debug("1. isobject: " + fullSchema.flattened + " of length " + fullSchema.length);
+            //   // $log.debug("1. object type: "+ UtilsFactory.toType(fullSchema.flattened));
+            // }
+
             //cache it
             var subjectInformationWithMetadata = {
               version: subjectInformation.version,
               id: subjectInformation.id,
               schema: subjectInformation.schema, // this is text
-              Schema: JSON.parse(subjectInformation.schema), // this is json
+              Schema:  fullSchema, //JSON.parse(subjectInformation.schema), // this is json
+              flattenedNames: UtilsFactory.recurseSchema(JSON.parse(subjectInformation.schema), "name"),
               subjectName: subjectInformation.subject
             };
             $log.debug("  pipeline: " + subjectName + "/" + subjectVersion + " in [ " + (new Date().getTime() - start) + " ] msec");
