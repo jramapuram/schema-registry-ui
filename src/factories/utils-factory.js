@@ -45,6 +45,18 @@ angularAPP.factory('UtilsFactory', function ($log) {
     return [];
   }
 
+  // http://stackoverflow.com/questions/1349404/generate-random-string-characters-in-javascript
+  function randomID()
+  {
+    var text = "";
+    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+    for( var i=0; i < 5; i++ )
+      text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+    return text;
+  }
+
   function toType(obj) {
     return ({}).toString.call(obj).match(/\s([a-zA-Z]+)/)[1].toLowerCase();
   }
@@ -84,6 +96,9 @@ angularAPP.factory('UtilsFactory', function ($log) {
         return a.version - b.version;
       });
       return sorted;
+    },
+    randomID: function(){
+      return randomID();
     },
     IsJsonString: function (str) {
       try {

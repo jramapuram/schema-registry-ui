@@ -26,6 +26,7 @@ angularAPP.controller('SubjectsCtrl', function ($rootScope, $scope, $route, $rou
   $scope.submitRunningList = function() {
     var url = env.ZEPPELIN() + '/api/notebook';
     $log.info("submitting running set: ", $rootScope.runningList, " to ", url);
+    SchemaRegistryFactory.putZeppelinNotebook($rootScope.runningList);
   };
 
   toastFactory.hideToast();

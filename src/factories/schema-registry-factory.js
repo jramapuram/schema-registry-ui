@@ -220,6 +220,52 @@ angularAPP.factory('SchemaRegistryFactory', function ($rootScope, $http, $locati
   }
 
   /**
+   * POST to Zeppelin
+   * @see https://zeppelin.apache.org/docs/0.8.0-SNAPSHOT/rest-api/rest-notebook.html#create-a-new-note
+   */
+  function putZeppelinNotebook(features) {
+
+    var deferred = $q.defer();
+    var subjectName = UtilsFactory.randomID(); // TODO: provide a name for the notebook
+    var featureNames = Array.from(features);
+    var textBlock = "val features = [" + featureNames.join() + "];";
+    var paragraphBlock = [{"title": "Feature Selection", "text": textBlock}];
+    // var postData = JSON.stringify({"name": subjectName, "paragraphs": paragraphBlock});
+
+    var postData = {};
+    postData.name = subjectName;
+    postData.paragraphs = paragraphBlock;
+
+    var postZeppelin = {
+      method: 'POST',
+      url: env.ZEPPELIN() + '/api/notebook',
+      data: postData,
+      dataType: 'json',
+      headers: {'Content-Type': 'application/json', 'Accept': 'application/json'}
+    };
+
+    $http(postZeppelin)
+      .success(function (data) {
+        $log.info("Success in posting " + JSON.stringify(postData)
+                  + " | Return data: " + JSON.stringify(data));
+
+        var newLocation = env.ZEPPELIN() + "#/notebook/" + JSON.stringify(data.body).replace(/['"]+/g, '');//+ subjectName;
+        $log.info("redirecting to " +  newLocation);
+        window.location = newLocation;
+      })
+      .error(function (data, status) {
+        $log.info("Error on posting the following to zeppelin : " + JSON.stringify(postData)
+                  + " | Error code: " + JSON.stringify(status)
+                  + " | Error message: ", JSON.stringify(data));
+        deferred.reject(data);
+      });
+
+    return deferred.promise;
+  }
+
+
+
+  /**
    * Put global config (Test input schema against a particular version of a subject’s schema for compatibility.
    * @see http://docs.confluent.io/3.0.0/schema-registry/docs/api.html#put--config
    */
@@ -412,6 +458,10 @@ angularAPP.factory('SchemaRegistryFactory', function ($rootScope, $http, $locati
 
     getSubjectConfig: function (subjectName) {
       return getSubjectConfig(subjectName);
+    },
+
+    putZeppelinNotebook: function(features) {
+      return putZeppelinNotebook(features);
     },
 
     putConfig: function (config) {
