@@ -2,10 +2,17 @@ angularAPP.controller('SubjectsCtrl', function ($rootScope, $scope, $route, $rou
 
   $log.info("Starting schema-registry controller: view ( " + $routeParams.subject + "/" + $routeParams.version + " )");
   $rootScope.listChanges = false;
-  $rootScope.runningList = [];
+  $rootScope.runningList = new Set();
 
-  $scope.checkboxModel = {
-    value1 : true
+  $scope.selectedChecked = function(name) {
+    $log.info("set adding " + name);
+    if ($rootScope.runningList.has(name)){
+      $rootScope.runningList.delete(name);
+    }else{
+      $rootScope.runningList.add(name);
+    }
+
+    $log.info("set now contains: ", $rootScope.runningList);
   };
 
   toastFactory.hideToast();
