@@ -11,6 +11,11 @@ EOF
 SCHEMAREGISTRY_URL=/api/schema-registry
 fi
 
+if [[ -z "$ZEPPELIN_URL" ]]; then
+    echo "Zeppelin URL was not set via ZEPPELIN_URL environment variable."
+    exit 1
+fi
+
 if [[ -z "$SCHEMAREGISTRY_URL" ]]; then
     echo "Schema Registry URL was not set via SCHEMAREGISTRY_URL environment variable."
 else
@@ -19,6 +24,7 @@ else
 var clusters = [
    {
      NAME: "default",
+     ZEPPELIN: "$ZEPPELIN_URL",
      SCHEMA_REGISTRY: "$SCHEMAREGISTRY_URL"
    }
 ]

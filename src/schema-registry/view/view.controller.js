@@ -24,7 +24,8 @@ angularAPP.controller('SubjectsCtrl', function ($rootScope, $scope, $route, $rou
   };
 
   $scope.submitRunningList = function() {
-    $log.info("submitting running set: ", $rootScope.runningList);
+    var url = env.ZEPPELIN() + '/api/notebook';
+    $log.info("submitting running set: ", $rootScope.runningList, " to ", url);
   };
 
   toastFactory.hideToast();
