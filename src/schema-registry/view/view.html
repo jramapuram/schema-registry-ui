@@ -151,6 +151,9 @@
                   <span class="md-title"><b>type:</b> {{subjectObject.Schema.type}}</span>
                   <span class="md-title"><b>name:</b> {{subjectObject.Schema.name}}</span>
                   <span class="md-title"><b>namespace:</b> {{subjectObject.Schema.namespace}}</span>
+                  <span class="md-title" >
+                    <button type="submit" ng-disabled="isSubmitDisabled" ng-click="submitRunningList()">Create Zeppelin Workbook</button>
+                  </span>
                 </md-card-header-text>
               </md-card-header>
               <md-card-content ng-show="subjectObject.Schema.doc != undefined" style="padding-bottom:5px">

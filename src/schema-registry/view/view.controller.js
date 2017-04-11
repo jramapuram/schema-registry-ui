@@ -2,17 +2,29 @@ angularAPP.controller('SubjectsCtrl', function ($rootScope, $scope, $route, $rou
 
   $log.info("Starting schema-registry controller: view ( " + $routeParams.subject + "/" + $routeParams.version + " )");
   $rootScope.listChanges = false;
+  $rootScope.isSubmitDisabled = true;
   $rootScope.runningList = new Set();
 
   $scope.selectedChecked = function(name) {
-    $log.info("set adding " + name);
+    // add/remove logic
     if ($rootScope.runningList.has(name)){
       $rootScope.runningList.delete(name);
     }else{
       $rootScope.runningList.add(name);
     }
 
+    // check to see if we should enable/disable our button
+    if ($rootScope.runningList.size > 0){
+      $rootScope.isSubmitDisabled = false;
+    }else{
+      $rootScope.isSubmitDisabled = true;
+    }
+
     $log.info("set now contains: ", $rootScope.runningList);
+  };
+
+  $scope.submitRunningList = function() {
+    $log.info("submitting running set: ", $rootScope.runningList);
   };
 
   toastFactory.hideToast();
