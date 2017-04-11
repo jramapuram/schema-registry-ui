@@ -13,14 +13,18 @@ angularAPP.factory('UtilsFactory', function ($log) {
 
   // schema = "{\"type\":\"record\",\"name\":\"User\",\"fields\":[{\"name\":\"bla\",\"type\":\"string\"}]}";
   // object =  JSON.parse(schema);
+  // http://jsfiddle.net/KJQ9K/1736/
   function recurseSchema(object, value, result) {
     var result = result || [];
 
     for (var key in object) {
       if (key === value) {
-        if (typeof object[key] === "object") {
-          recurseSchema(object[key], value, result);
-        }else {
+        //if (typeof object[key] === "object") {
+        //  recurseSchema(object[key], value, result);
+        //}else {
+        //  result.push(object[key]);
+        //}
+        if (typeof object[key] === "string") {
           result.push(object[key]);
         }
       }
@@ -35,7 +39,7 @@ angularAPP.factory('UtilsFactory', function ($log) {
 
   function prependBaseName(basename, arr){
     for (var i = 0; i < arr.length; i++){
-      arr[i] = String(basename) + "." + String(arr[i]);
+      arr[i] = String(basename) + "\r\n" + String(arr[i]);
     }
 
     if (arr.length > 0) {

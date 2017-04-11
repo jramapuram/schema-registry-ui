@@ -228,9 +228,8 @@ angularAPP.factory('SchemaRegistryFactory', function ($rootScope, $http, $locati
     var deferred = $q.defer();
     var subjectName = UtilsFactory.randomID(); // TODO: provide a name for the notebook
     var featureNames = Array.from(features);
-    var textBlock = "val features = [" + featureNames.join() + "];";
+    var textBlock = "val features = [" + featureNames.map(featureName => `'${featureName}'`).join(',') + "];";
     var paragraphBlock = [{"title": "Feature Selection", "text": textBlock}];
-    // var postData = JSON.stringify({"name": subjectName, "paragraphs": paragraphBlock});
 
     var postData = {};
     postData.name = subjectName;
@@ -249,7 +248,7 @@ angularAPP.factory('SchemaRegistryFactory', function ($rootScope, $http, $locati
         $log.info("Success in posting " + JSON.stringify(postData)
                   + " | Return data: " + JSON.stringify(data));
 
-        var newLocation = env.ZEPPELIN() + "#/notebook/" + JSON.stringify(data.body).replace(/['"]+/g, '');//+ subjectName;
+        var newLocation = env.ZEPPELIN() + "#/notebook/" + JSON.stringify(data.body).replace(/['"]+/g, '');
         $log.info("redirecting to " +  newLocation);
         window.location = newLocation;
       })
