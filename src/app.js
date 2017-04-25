@@ -1,5 +1,46 @@
 'use strict';
 
+var heightLastTimeSent = 0;
+function postDocumentHeight()
+{
+  var height = $(document).height();
+
+  if (height == heightLastTimeSent)
+    return;
+
+  console.log("height : " + height);
+
+  heightLastTimeSent = height;
+
+  var target = parent.postMessage ? parent
+    : (parent.document.postMessage ? parent.document : undefined);
+
+  if (typeof target != "undefined" && document.body.scrollHeight)
+  {
+    var msg = {
+      type : "ifram-height",
+      data : height
+
+    };
+    target.postMessage(msg, "*");
+  }
+}
+
+if (top != self)
+{
+  postDocumentHeight();
+  $(window).resize(postDocumentHeight);
+
+  $(document).bind('DOMSubtreeModified', postDocumentHeight);
+  $(document).bind('DOMNodeInserted', postDocumentHeight);
+  $(document).bind('DOMNodeRemoved', postDocumentHeight);
+  $(document).bind('DOMNodeRemovedFromDocument', postDocumentHeight);
+  $(document).bind('DOMNodeInsertedIntoDocument', postDocumentHeight);
+  $(document).bind('DOMAttrModified', postDocumentHeight);
+  $(document).bind('DOMCharacterDataModified', postDocumentHeight);
+}
+
+
 var angularAPP = angular.module('angularAPP', [
   'ui.ace',
   'angularSpinner',
