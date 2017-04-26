@@ -16,6 +16,7 @@
     "bower_components"
   ],
   "dependencies": {
+    "jQuery": "3.2.1",
     "angular": "1.5.9",
     "angular-route": "1.5.9",
     "angular-animate": "1.5.9",
@@ -33,9 +34,9 @@
     "Stuk/jszip-utils": "*",
     "angular-diff-match-patch": "^0.2.4",
     "angular-json-tree": "^1.0.1"
-
   },
   "resolutions": {
-    "angular": "1.5.*"
+    "angular": "1.5.*",
+    "webcomponentsjs": "^0.6.0"
   }
 }

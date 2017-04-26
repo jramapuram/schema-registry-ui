@@ -24,6 +24,7 @@ module.exports = function (grunt) {
           'src/**/*.html',
           'src/**/**/*.html',
           'env.js',
+          'bower_components/jquery/dist/jquery.js',
           'bower_components/angular/angular.min.js',
           'bower_components/angular/angular.min.js.map',                 // Include source-maps
           'bower_components/angular-spinner/angular-spinner.min.js',

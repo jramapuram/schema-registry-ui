@@ -7,7 +7,7 @@ RUN apk add --no-cache ca-certificates wget \
     && echo "progress = dot:giga" | tee /etc/wgetrc
 
 # Add and Setup Caddy webserver
-RUN wget "https://caddyserver.com/download/build?os=linux&arch=amd64&features=" \
+RUN wget "https://caddyserver.com/download/linux/amd64" \
          -O /caddy.tgz \
     && mkdir caddy \
     && tar xzf caddy.tgz -C /caddy \
