@@ -15,7 +15,7 @@ You will need schema-registry installed with CORS enabled.
 In order to enable CORS, add in `/opt/confluent-3.x.x/etc/schema-registry/schema-registry.properties`
 
 ```
-access.control.allow.methods=GET,POST,OPTIONS
+access.control.allow.methods=GET,POST,PUT,OPTIONS
 access.control.allow.origin=*
 ```
 And then restart the [schema-registry] service
@@ -27,20 +27,26 @@ docker run -d --name=fast-data-dev -p 8081:8081 landoop/fast-data-dev
 ```
 Checkout more about fast-data-dev docker container [here](https://github.com/Landoop/fast-data-dev)
 
-## Running it
+## Running it via Docker
+
+To run it via the provided docker image:
 
 ```
-    docker pull landoop/schema-registry-ui
-    docker run --rm -it -p 8000:8000 \
-               -e "SCHEMAREGISTRY_URL=http://confluent-schema-registry-host:port" \
-               landoop/schema-registry-ui
+docker pull landoop/schema-registry-ui
+docker run --rm -p 8000:8000 \
+           -e "SCHEMAREGISTRY_URL=http://confluent-schema-registry-host:port" \
+           landoop/schema-registry-ui
 ```
+
+Please see the [docker readme](https://github.com/Landoop/schema-registry-ui/tree/master/docker) for more information
+and how to enable various features or avoid CORS issues via the proxy flag.
 
 ## Build from source
 
 ```
     git clone https://github.com/Landoop/schema-registry-ui.git
     cd schema-registry-ui
+    npm install -g bower
     npm install
     http-server .
 ```
@@ -64,20 +70,22 @@ var clusters = [
    {
        NAME:"prod",
        // Schema Registry service URL (i.e. http://localhost:8081)
-       SCHEMA_REGISTRY: "http://localhost:8081",
+       SCHEMA_REGISTRY: "http://localhost:8081", // https://schema-registry.demo.landoop.com
        COLOR: "#141414" // optional
      },
      {
        NAME:"dev",
        SCHEMA_REGISTRY: "http://localhost:8383",
        COLOR: "red", // optional
-       allowGlobalConfigChange: true // optional
+       allowGlobalConfigChanges: true, // optional
+       //allowTransitiveCompatibilities: true        // if using a Confluent Platform release >= 3.1.1 uncomment this line
      }
   ];
 
 ```
 * Use `COLOR` to set different header colors for each set up cluster.
-* Use `allowGlobalConfigChange` to enable configuring Global Compatibility Level from the UI.
+* Use `allowGlobalConfigChanges` to enable configuring Global Compatibility Level from the UI.
+* Use `allowTransitiveCompatibilities` to enable transitive compatibility levels. This is supported in CP >= 3.1.1
 
 ## Changelog
 [Here](https://github.com/Landoop/schema-registry-ui/wiki/Changelog)
