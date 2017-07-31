@@ -14,27 +14,6 @@ angularAPP.factory('UtilsFactory', function ($log) {
   // schema = "{\"type\":\"record\",\"name\":\"User\",\"fields\":[{\"name\":\"bla\",\"type\":\"string\"}]}";
   // object =  JSON.parse(schema);
   // http://jsfiddle.net/KJQ9K/1736/
-  // function recurseSchema(object, value, result) {
-  //   var result = result || [];
-
-  //   for (var key in object) {
-  //     if (typeof object[key] === "string" && key === value) {
-  //       //if (typeof object[key] === "object") {
-  //       //  recurseSchema(object[key], value, result);
-  //       //}else {
-  //       //  result.push(object[key]);
-  //       //}
-  //       result.push(object[key]);
-  //     }
-
-  //     if (typeof object[key] === "object") {
-  //       recurseSchema(object[key], value, result);
-  //     }
-  //   }
-
-  //   return result;
-  // }
-
   function recurseSchema(object, basename,
                          separator="\r\n",
                          name_key="name")
@@ -44,7 +23,7 @@ angularAPP.factory('UtilsFactory', function ($log) {
     // Gather the basename for recursive objects
     var basename_recursive = basename;
     if (result.length > 0) {
-      basename_recursive = result[result.length - 1];
+      basename_recursive = result[result.length - 1][-1];
     }
 
     for (var key in object) {
@@ -56,15 +35,14 @@ angularAPP.factory('UtilsFactory', function ($log) {
       if (typeof object[key] === "string" &&
           key == name_key)
       {
-        // XXX: parameterize the separator character
-        result.push(String(basename) +
-                    separator +
-                    object[key]);
+        result.push([String(basename) +
+                     separator +
+                     object[key]]);
       }
 
       if (typeof object[key] === "object") {
         var basename_t = String(basename_recursive) + separator + String(current_name);
-        result = result.concat(
+        result.push(
           recurseSchema(object[key], basename_t,
                         separator, name_key)
         );
@@ -110,25 +88,12 @@ angularAPP.factory('UtilsFactory', function ($log) {
       });
   }
 
-  // function getFullyQualifiedName(object, value){
-  //   var result = [];
-
-  //   for (var key in object){
-
-  //   }
-  // }
-
   /* Public API */
   return {
     recurseSchema: function(object, value) {
-      // return prependBaseName(object["name"],
-      //                        recurseSchema(object.fields, value, result));
-      //return recurseSchema(object.fields, "");
       return prependBaseName(
         value, prependBaseName(object["name"], recurseSchema(object.fields, ""))
       );
-      // return prependBaseName(object[value],
-      //                        recurseSchema(object.fields, value));
     },
     range: function(start, count){
       return range(start, count);
