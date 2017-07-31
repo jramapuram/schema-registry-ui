@@ -534,7 +534,7 @@ angularAPP.factory('SchemaRegistryFactory', function ($rootScope, $http, $locati
                 id: data.id,            // id
                 schema: data.schema,    // schema - in String - schema i.e. {\"type\":\"record\",\"name\":\"User\",\"fields\":[{\"name\":\"name\",\"type\":\"string\"}]}
                 Schema: schemaData,     // js type | name | doc | fields ...
-                flattenedNames: UtilsFactory.recurseSchema(schemaData, "name"),
+                flattenedNames: UtilsFactory.recurseSchema(schemaData, data.subject),
                 subjectName: data.subject
               };
               CACHE.push(cacheData);

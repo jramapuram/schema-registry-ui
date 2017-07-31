@@ -85,10 +85,16 @@ angularAPP.controller('SubjectsCtrl', function ($rootScope, $scope, $route, $rou
       $rootScope.schema = selectedSubject.Schema.fields;
 
       // flattened schemas need to be appened here so that they can be viewed in the viewer
-      if (selectedSubject.flattenedNames != null && selectedSubject.flattenedNames.length > 0){
+      $log.info('flattened is null?' +
+                String(selectedSubject.flattenedNames == null) +
+                " len = " +
+                String(selectedSubject.flattenedNames.length));
+      if (selectedSubject.flattenedNames != null &&
+          selectedSubject.flattenedNames.length > 0)
+      {
         $rootScope.schema.flattened = selectedSubject.flattenedNames;
-        $log.info('rootscope schema type: ' + UtilsFactory.toType($rootScope.schema)
-                  + ', flattened is '+ $rootScope.schema.flattened);
+        $log.info('rootscope schema type: ' + UtilsFactory.toType($rootScope.schema) +
+                  ', flattened is: \n '+ $rootScope.schema.flattened);
       }
       // else {
       //   $rootScope.schema.flattened = [];
