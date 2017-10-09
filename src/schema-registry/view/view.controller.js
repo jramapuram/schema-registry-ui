@@ -3,9 +3,12 @@ angularAPP.controller('SubjectsCtrl', function ($rootScope, $scope, $route, $rou
   $log.info("Starting schema-registry controller: view ( " + $routeParams.subject + "/" + $routeParams.version + " )");
   $rootScope.listChanges = false;
   $rootScope.isSubmitDisabled = true;
+  $rootScope.algorithm = "";
+  $rootScope.baseName = "";
   $rootScope.runningList = new Set();
 
-  $scope.selectedChecked = function(name) {
+  $scope.selectedChecked = function(basename, name) {
+    $rootScope.baseName = basename;
     // add/remove logic
     if ($rootScope.runningList.has(name)){
       $rootScope.runningList.delete(name);
@@ -24,9 +27,33 @@ angularAPP.controller('SubjectsCtrl', function ($rootScope, $scope, $route, $rou
   };
 
   $scope.submitRunningList = function() {
+    if (!String.prototype.format) {
+      String.prototype.format = function() {
+        var args = arguments;
+        return this.replace(/{(\d+)}/g, function(match, number) {
+          return typeof args[number] != 'undefined'
+            ? args[number]
+            : match
+          ;
+        });
+      };
+    }
+
     var url = env.ZEPPELIN() + '/api/notebook';
     $log.info("submitting running set: ", $rootScope.runningList, " to ", url);
-    SchemaRegistryFactory.putZeppelinNotebook($rootScope.runningList);
+    $log.info("submitting with algorithm: ", $rootScope.algorithm);
+    var featureNames = Array.from($rootScope.runningList);
+    var textBlock = SchemaRegistryFactory.getAlgorithm($rootScope.algorithm);
+    $log.info("received : ", textBlock);
+    textBlock = textBlock.format($rootScope.baseName,
+                                 featureNames.map(featureName => `'${featureName}'`).join(','));
+    $log.info("formatted : ", textBlock);
+    SchemaRegistryFactory.putZeppelinNotebook(textBlock);
+  };
+
+  $scope.setAlgorithm = function(alg) {
+    $rootScope.algorithm = alg;
+    $log.info("setting algorithm to ", $rootScope.algorithm);
   };
 
   toastFactory.hideToast();
@@ -93,7 +120,9 @@ angularAPP.controller('SubjectsCtrl', function ($rootScope, $scope, $route, $rou
           selectedSubject.flattenedNames.length > 0)
       {
         $rootScope.schema.flattened = selectedSubject.flattenedNames;
-        $log.info('rootscope schema type: ' + UtilsFactory.toType($rootScope.schema) +
+        $rootScope.schema.basename = selectedSubject.baseName;
+        $log.info('basename: ', $rootScope.schema.basename,
+                  'rootscope schema type: ' + UtilsFactory.toType($rootScope.schema) +
                   ', flattened is: \n '+ $rootScope.schema.flattened);
       }
       // else {

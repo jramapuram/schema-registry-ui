@@ -15,7 +15,7 @@ angularAPP.factory('UtilsFactory', function ($log) {
   // object =  JSON.parse(schema);
   // http://jsfiddle.net/KJQ9K/1736/
   function recurseSchema(object, basename,
-                         separator="\r\n",
+                         separator=".",
                          name_key="name")
   {
     var result = [];
@@ -35,13 +35,24 @@ angularAPP.factory('UtilsFactory', function ($log) {
       if (typeof object[key] === "string" &&
           key == name_key)
       {
-        result.push([String(basename) +
-                     separator +
-                     object[key]]);
+        if (basename) {
+          result.push([String(basename) +
+                       separator +
+                       object[key]]);
+        }else {
+          result.push([object[key]]);
+        }
+        //result[result.length - 1] = result[result.length - 1].resplace("..", ".");
       }
 
       if (typeof object[key] === "object") {
-        var basename_t = String(basename_recursive) + separator + String(current_name);
+        var basename_t = "";
+        if (basename_recursive) {
+          basename_t = String(basename_recursive) + separator + String(current_name);
+        } else {
+          basename_t = String(current_name);
+        }
+
         result.push(
           recurseSchema(object[key], basename_t,
                         separator, name_key)
@@ -53,9 +64,12 @@ angularAPP.factory('UtilsFactory', function ($log) {
   }
 
 
-  function prependBaseName(basename, arr){
+  function prependBaseName(basename, arr, separator="."){
     for (var i = 0; i < arr.length; i++){
-      arr[i] = String(basename) + "\r\n" + String(arr[i]);
+      if (basename){
+        arr[i] = String(basename) + separator + String(arr[i]);
+      }
+      $log.info("arr[i] = ", arr[i]);
     }
 
     if (arr.length > 0) {
@@ -91,9 +105,13 @@ angularAPP.factory('UtilsFactory', function ($log) {
   /* Public API */
   return {
     recurseSchema: function(object, value) {
-      return prependBaseName(
-        value, prependBaseName(object["name"], recurseSchema(object.fields, ""))
-      );
+      // return prependBaseName(
+      //   value, prependBaseName(object["name"], recurseSchema(object.fields, ""))
+      // );
+      $log.info("generated : ", recurseSchema(object.fields, ""));
+      return [object["name"],
+              prependBaseName(object["name"], recurseSchema(object.fields, ""))];
+              //recurseSchema(object.fields, object["name"])];
     },
     range: function(start, count){
       return range(start, count);

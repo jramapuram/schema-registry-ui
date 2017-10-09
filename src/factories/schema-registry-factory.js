@@ -220,15 +220,46 @@ angularAPP.factory('SchemaRegistryFactory', function ($rootScope, $http, $locati
   }
 
   /**
+   *  Helper to get the string value for an algorithm
+   */
+  function getAlgorithm(alg) {
+    $log.info("got ", alg, " in getalg");
+    switch (alg) {
+    case 'batch_kmeans':
+      return `
+              val sqlc = new org.apache.spark.sql.SQLContext(sc)
+              val U = new SparkUtils()
+              val df = U.createDataFrame(sqlc, "hdfs://hnn1-americano.di.uoa.gr:9000/topics/{0}")
+              val features = Array({1})
+              val config = KmeansConfig(k=15) //change this to desired K
+              val kmeansTask = new KmeansTask()
+              val results = kmeansTask.fit(config, df, features)
+              val (pipelineModel, assembler, kmeansModel, trainingError) = results
+      `;
+
+    case 'batch_dt':
+      throw 'Batch Decision Tree not implemented';
+
+    case 'streaming_kmeans':
+      throw 'Streaming KMeans not implemented';
+
+    default:
+      return `
+          val sqlc = new org.apache.spark.sql.SQLContext(sc)
+          val U = new SparkUtils()
+          val df = U.createDataFrame(sqlc, "hdfs://hnn1-americano.di.uoa.gr:9000/topics/{0}")
+          val features = Array({1})
+      `;
+    }
+  }
+
+  /**
    * POST to Zeppelin
    * @see https://zeppelin.apache.org/docs/0.8.0-SNAPSHOT/rest-api/rest-notebook.html#create-a-new-note
    */
-  function putZeppelinNotebook(features) {
-
+  function putZeppelinNotebook(textBlock) {
     var deferred = $q.defer();
     var subjectName = UtilsFactory.randomID(); // TODO: provide a name for the notebook
-    var featureNames = Array.from(features);
-    var textBlock = "val features = [" + featureNames.map(featureName => `'${featureName}'`).join(',') + "];";
     var paragraphBlock = [{"title": "Feature Selection", "text": textBlock}];
 
     var postData = {};
@@ -459,8 +490,12 @@ angularAPP.factory('SchemaRegistryFactory', function ($rootScope, $http, $locati
       return getSubjectConfig(subjectName);
     },
 
-    putZeppelinNotebook: function(features) {
-      return putZeppelinNotebook(features);
+    getAlgorithm: function (alg) {
+      return getAlgorithm(alg);
+    },
+
+    putZeppelinNotebook: function(textBlock) {
+      return putZeppelinNotebook(textBlock);
     },
 
     putConfig: function (config) {
@@ -529,12 +564,17 @@ angularAPP.factory('SchemaRegistryFactory', function ($rootScope, $http, $locati
               //              + UtilsFactory.toType(schemaData.flattened));
               // }
 
+              var tpl = UtilsFactory.recurseSchema(schemaData, data.subject);
+              var baseName = tpl[0];
+              var flattenedNames = tpl[1];
+
               var cacheData = {
                 version: data.version,  // version
                 id: data.id,            // id
                 schema: data.schema,    // schema - in String - schema i.e. {\"type\":\"record\",\"name\":\"User\",\"fields\":[{\"name\":\"name\",\"type\":\"string\"}]}
                 Schema: schemaData,     // js type | name | doc | fields ...
-                flattenedNames: UtilsFactory.recurseSchema(schemaData, data.subject),
+                flattenedNames: flattenedNames,
+                baseName: baseName,
                 subjectName: data.subject
               };
               CACHE.push(cacheData);
@@ -579,12 +619,17 @@ angularAPP.factory('SchemaRegistryFactory', function ($rootScope, $http, $locati
             // }
 
             //cache it
+            var tpl = UtilsFactory.recurseSchema(JSON.parse(subjectInformation.schema), "name");
+            var baseName = tpl[0];
+            var flattenedNames = tpl[1];
+
             var subjectInformationWithMetadata = {
               version: subjectInformation.version,
               id: subjectInformation.id,
               schema: subjectInformation.schema, // this is text
               Schema:  fullSchema, //JSON.parse(subjectInformation.schema), // this is json
-              flattenedNames: UtilsFactory.recurseSchema(JSON.parse(subjectInformation.schema), "name"),
+              flattenedNames: flattenedNames,
+              baseName: baseName,
               subjectName: subjectInformation.subject
             };
             $log.debug("  pipeline: " + subjectName + "/" + subjectVersion + " in [ " + (new Date().getTime() - start) + " ] msec");

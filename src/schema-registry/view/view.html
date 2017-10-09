@@ -142,7 +142,7 @@
           <md-content class="md-padding">
             <!-- Nice header -->
             <md-card style="box-shadow:none;" ng-hide="arraySchema">
-              <md-card-header style="padding:10px">
+              <md-card-header style="padding:30px">
                 <md-card-avatar>
                   <md-icon class="md-avatar-icon" md-svg-icon="src/assets/icons/avro.svg"
                            style="height: 32px;width: 32px;margin-top: 10px;margin-left: 5px;padding:0;background-color:white"></md-icon>
@@ -151,9 +151,23 @@
                   <span class="md-title"><b>type:</b> {{subjectObject.Schema.type}}</span>
                   <span class="md-title"><b>name:</b> {{subjectObject.Schema.name}}</span>
                   <span class="md-title"><b>namespace:</b> {{subjectObject.Schema.namespace}}</span>
+
+                  <div class="start" layout="row" layout-align="end center">
                   <span class="md-title" >
-                    <button type="submit" ng-disabled="isSubmitDisabled" ng-click="submitRunningList()">Create Zeppelin Workbook</button>
+                    <md-menu>
+                      <md-button ng-click="$mdMenu.open($event)" class="md-icon-button">
+                        <md-icon md-svg-icon="src/assets/icons/algorithm.svg"></md-icon>
+                      </md-button>
+                      <md-menu-content>
+                        <md-menu-item><md-button ng-click="setAlgorithm('batch_kmeans')">Batch KMeans</md-button></md-menu-item>
+                        <md-menu-item><md-button ng-click="setAlgorithm('batch_dt')">Batch Decision Tree</md-button></md-menu-item>
+                        <md-menu-item><md-button ng-click="setAlgorithm('streaming_kmeans')">Streaming KMeans</md-button></md-menu-item>
+                      </md-menu-content>
+                    </md-menu>
+                    <md-button class="md-accent md-raised" ng-disabled="isSubmitDisabled" ng-click="submitRunningList()">Create Zeppelin Workbook</md-button>
                   </span>
+                  </div>
+
                 </md-card-header-text>
               </md-card-header>
               <md-card-content ng-show="subjectObject.Schema.doc != undefined" style="padding-bottom:5px">
@@ -190,7 +204,7 @@
                     <td md-cell>
                       <input type="checkbox"
                              ng-model="configured"
-                             ng-change="selectedChecked(schema.flattened[$index])"
+                             ng-change="selectedChecked(schema.basename, schema.flattened[$index])"
                              name="checkbox_{{$index}}" />
                     </td>
                   </tr>
