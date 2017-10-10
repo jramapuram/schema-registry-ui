@@ -28,7 +28,7 @@ angularAPP.factory('UtilsFactory', function ($log) {
 
     for (var key in object) {
       var current_name = "";
-      if ("name" in object){
+      if ("name" in object) {
         current_name = object["name"];
       }
 
@@ -42,14 +42,19 @@ angularAPP.factory('UtilsFactory', function ($log) {
         }else {
           result.push([object[key]]);
         }
-        //result[result.length - 1] = result[result.length - 1].resplace("..", ".");
       }
 
       if (typeof object[key] === "object") {
         var basename_t = "";
         if (basename_recursive) {
-          basename_t = String(basename_recursive) + separator + String(current_name);
-        } else {
+          if (current_name) {
+            basename_t = String(basename_recursive) + separator + String(current_name);
+          }else{
+            basename_t = String(basename_recursive);
+          }
+          // $log.debug("basename_recursive = ", basename_recursive,
+          //            "basename_t = ", basename_t);
+        }else {
           basename_t = String(current_name);
         }
 
@@ -60,16 +65,26 @@ angularAPP.factory('UtilsFactory', function ($log) {
       }
     }
 
-    return result;
-  }
+    Array.prototype.clean = function(deleteValue) {
+      for (var i = 0; i < this.length; i++) {
+        if (this[i] == deleteValue) {
+          this.splice(i, 1);
+          i--;
+        }
+      }
+      return this;
+    };
 
+    return result.clean(undefined).clean("");
+  }
 
   function prependBaseName(basename, arr, separator="."){
     for (var i = 0; i < arr.length; i++){
       if (basename){
         arr[i] = String(basename) + separator + String(arr[i]);
+      }else {
+        arr[i] = String(arr[i]);
       }
-      $log.info("arr[i] = ", arr[i]);
     }
 
     if (arr.length > 0) {
@@ -108,9 +123,10 @@ angularAPP.factory('UtilsFactory', function ($log) {
       // return prependBaseName(
       //   value, prependBaseName(object["name"], recurseSchema(object.fields, ""))
       // );
-      $log.info("generated : ", recurseSchema(object.fields, ""));
+      // $log.info("generated : ", recurseSchema(object.fields, ""));
       return [object["name"],
-              prependBaseName(object["name"], recurseSchema(object.fields, ""))];
+              prependBaseName("", recurseSchema(object.fields, ""))];
+              //prependBaseName(object["name"], recurseSchema(object.fields, ""))];
               //recurseSchema(object.fields, object["name"])];
     },
     range: function(start, count){

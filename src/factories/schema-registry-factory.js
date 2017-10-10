@@ -223,33 +223,125 @@ angularAPP.factory('SchemaRegistryFactory', function ($rootScope, $http, $locati
    *  Helper to get the string value for an algorithm
    */
   function getAlgorithm(alg) {
-    $log.info("got ", alg, " in getalg");
+    $log.info("got \"", alg, "\" in getalg");
     switch (alg) {
     case 'batch_kmeans':
       return `
-              val sqlc = new org.apache.spark.sql.SQLContext(sc)
-              val U = new SparkUtils()
-              val df = U.createDataFrame(sqlc, "hdfs://hnn1-americano.di.uoa.gr:9000/topics/{0}")
-              val features = Array({1})
-              val config = KmeansConfig(k=15) //change this to desired K
-              val kmeansTask = new KmeansTask()
-              val results = kmeansTask.fit(config, df, features)
-              val (pipelineModel, assembler, kmeansModel, trainingError) = results
-      `;
+val sqlc = new org.apache.spark.sql.SQLContext(sc)
+
+val myBatchJobConfig = BatchJobConfig(
+    // Hdfs path [hardcoded for now]
+    hdfsPath = "hdfs://hnn1-americano.di.uoa.gr:9000/topics/",
+    // DataFrame shaping
+    topic = "{0}",
+    selectedFields = Array({1}),
+    filter = Array(
+        // eg: you can filter as follows:
+        // ("header.sourceSystem", "hmod.wizzit.venac.2", "=="),
+        // ("y", 0.01, ">")
+    ),
+
+    // The content needs to be specified manually, eg:
+    // content = Array("header.time", "header.sourceSystem", "x", "y", "z")
+    content = Array("")
+)
+
+val myBatchJob = new BatchJob()
+
+// Create the DataFrame coontaining the desired data
+val df = myBatchJob.createDataFrame(sqlc, myBatchJobConfig)
+
+val myBatchKmeansConfig = BatchKmeansConfig(
+    k = 5, // change to cluster desired
+    // The features need to be filtered manually
+    // eg: features = Array("x", "y", "z")
+    features = Array()
+)
+
+val myBatchKmeans = new BatchKmeans()
+val results = myBatchKmeans.fit(df, myBatchKmeansConfig)
+val (pipelineModel, assembler, kmeansModel, trainingError) = results
+val centroids = kmeansModel.clusterCenters
+centroids.zipWithIndex.foreach(c => println(s"Centroid #\$\{c._2\} coordinates: \$\{c._1\}"))
+// Need to specify output transform as well, eg:
+// val clusteredDf = pipelineModel.transform(df).select("x", "y", "z", "prediction")
+val clusteredDf = pipelineModel.transform(df).select()
+clusteredDf.show(10)`;
+      // return `
+      //         val sqlc = new org.apache.spark.sql.SQLContext(sc)
+      //         val U = new SparkUtils()
+      //         val df = U.createDataFrame(sqlc, "hdfs://hnn1-americano.di.uoa.gr:9000/topics/{0}")
+      //         val features = Array({1})
+      //         val config = KmeansConfig(k=15) //change this to desired K
+      //         val kmeansTask = new KmeansTask()
+      //         val results = kmeansTask.fit(config, df, features)
+      //         val (pipelineModel, assembler, kmeansModel, trainingError) = results
+      // `;
 
     case 'batch_dt':
       throw 'Batch Decision Tree not implemented';
 
     case 'streaming_kmeans':
-      throw 'Streaming KMeans not implemented';
+     return `
+val myStreamingJobConfig = StreamingJobConfig(
+    // Network
+    schemaRegistryHost = "eagle5.di.uoa.gr",
+    kafkaBrokerHost = "eagle5.di.uoa.gr",
+    carbonHost = "eagle5.di.uoa.gr",
+    // Spark Streaming
+    cpDir = "hdfs://hnn1-americano.di.uoa.gr:9000/spark/test125",
+    // Stream shaping
+    topic = "{0}",
+    selectedFields = Array({1}),
+    filter = Array(
+        // Filter, an example is shown below:
+        // ("unit", "KELVIN", "=="),
+        // ("value", 1000.0, "<="),
+        // ("value", -1000.0, ">="),
+        // Array(("header.sourceModule","module00", "=="), ("header.sourceModule", "module01", "=="), ("header.sourceModule","feature00", "==")),
+        // Array(("header.sourceSystem", "robot00", "=="), ("header.sourceSystem","sick_py_generator", "=="))
+    ),
+    // Specify the content, example below:
+    // content = Array("header.time", "value")
+    content = Array()
+)
+
+val myStreamingJob = new StreamingJob()
+
+val myStreamingKmeansConfig = StreamingKmeansConfig(
+    k = 10, // specify these hyperparameters
+    decayFactor = 0.9,
+    // Need to specify the features, eg:
+    // features = Array("value")
+    features = Array()
+)
+
+val myStreamingKmeans = new StreamingKmeans()
+
+import org.apache.spark.streaming.{Seconds, StreamingContext}
+
+val batchInterval = Seconds(myStreamingJobConfig.batchInterval)
+val ssc = new StreamingContext(sc, batchInterval)
+ssc.checkpoint(myStreamingJobConfig.cpDir)
+
+val myStream = myStreamingJob.subscribeToKafkaStream(ssc, myStreamingJobConfig)
+
+// Need to specify output destination, example below:
+// myStreamingJob.sendGrafana(myStream, myStreamingJobConfig, "header.time", "value", "raw.fake_robot_0")
+myStreamingJob.sendGrafana(myStream, myStreamingJobConfig, "")
+
+val trainedStreamingKmeans = myStreamingKmeans.train(myStream, myStreamingKmeansConfig)
+
+val latestModel = trainedStreamingKmeans.latestModel()
+
+ssc.start()`;
 
     default:
       return `
-          val sqlc = new org.apache.spark.sql.SQLContext(sc)
-          val U = new SparkUtils()
-          val df = U.createDataFrame(sqlc, "hdfs://hnn1-americano.di.uoa.gr:9000/topics/{0}")
-          val features = Array({1})
-      `;
+val sqlc = new org.apache.spark.sql.SQLContext(sc)
+val U = new SparkUtils()
+val df = U.createDataFrame(sqlc, "hdfs://hnn1-americano.di.uoa.gr:9000/topics/{0}")
+val features = Array({1})`;
     }
   }
 

@@ -43,10 +43,20 @@ angularAPP.controller('SubjectsCtrl', function ($rootScope, $scope, $route, $rou
     $log.info("submitting running set: ", $rootScope.runningList, " to ", url);
     $log.info("submitting with algorithm: ", $rootScope.algorithm);
     var featureNames = Array.from($rootScope.runningList);
+    // for (var i = 0; i < featureNames.length; i++) {
+    //   featureNames[i] = featureNames[i].replace(',', '\',\'');
+    // }
+
     var textBlock = SchemaRegistryFactory.getAlgorithm($rootScope.algorithm);
     $log.info("received : ", textBlock);
+    var featureBlock = featureNames.map(featureName => `'${featureName}'`).join(',');
+    String.prototype.replaceAll = function(search, replacement) {
+      var target = this;
+      return target.replace(new RegExp(search, 'g'), replacement);
+    };
+    featureBlock = featureBlock.replaceAll(',', `','`);
     textBlock = textBlock.format($rootScope.baseName,
-                                 featureNames.map(featureName => `'${featureName}'`).join(','));
+                                 featureBlock);
     $log.info("formatted : ", textBlock);
     SchemaRegistryFactory.putZeppelinNotebook(textBlock);
   };
@@ -114,13 +124,13 @@ angularAPP.controller('SubjectsCtrl', function ($rootScope, $scope, $route, $rou
       // flattened schemas need to be appened here so that they can be viewed in the viewer
       $log.info('flattened is null?' +
                 String(selectedSubject.flattenedNames == null) +
-                " len = " +
+                " len = "+
                 String(selectedSubject.flattenedNames.length));
       if (selectedSubject.flattenedNames != null &&
           selectedSubject.flattenedNames.length > 0)
       {
         $rootScope.schema.flattened = selectedSubject.flattenedNames;
-        $rootScope.schema.basename = selectedSubject.baseName;
+        $rootScope.schema.basename = selectedSubject.subjectName; // selectedSubject.baseName;
         $log.info('basename: ', $rootScope.schema.basename,
                   'rootscope schema type: ' + UtilsFactory.toType($rootScope.schema) +
                   ', flattened is: \n '+ $rootScope.schema.flattened);
